@@ -9,7 +9,7 @@ import warnings
 # Import moduli locali
 from ontology_core import build_advanced_ontology
 from semantic_reasoner import DiagnosticReasoner
-from ontobk_learning import SemanticFeatureExtractor
+from ontoBK_learning import SemanticFeatureExtractor
 
 warnings.filterwarnings('ignore')
 

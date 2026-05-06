@@ -1,0 +1,16 @@
+sintomi,guasto
+TempTroppoAlta,GuastoTermico
+TicchettioEstrusore;FilamentoNonEsce,GuastoMeccanico
+TempTroppoAlta;TicchettioEstrusore,GuastoComplesso
+FilamentoNonEsce,GuastoMeccanico
+TempTroppoAlta;OdoreBruciato,GuastoTermicoElettrico
+VibrazioneAnomala,GuastoMeccanico
+PiattoFreddo,GuastoTermico
+PiattoFreddo;OdoreBruciato,GuastoTermicoElettrico
+TicchettioEstrusore;VibrazioneAnomala,GuastoMeccanico
+OdoreBruciato,GuastoElettrico
+FilamentoNonEsce;PiattoFreddo,GuastoComplesso
+TempTroppoAlta;FilamentoNonEsce,GuastoComplesso
+VibrazioneAnomala;TicchettioEstrusore,GuastoMeccanico
+OdoreBruciato;TempTroppoAlta,GuastoTermicoElettrico
+PiattoFreddo,GuastoTermico

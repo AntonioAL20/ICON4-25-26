@@ -2,53 +2,54 @@ import numpy as np
 
 class SemanticFeatureExtractor:
     """
-    Soddisfa il requisito di Apprendimento "ML + OntoBK" (Ontology Background Knowledge).
-    Trasforma un dataset grezzo arricchendolo con le deduzioni del reasoner semantico.
+    Implementa l'approccio OntoBK (Ontology Background Knowledge).
+    Arricchisce le features di base usando le deduzioni dell'Ontologia.
     """
     def __init__(self, reasoner):
         self.reasoner = reasoner
         
-        # Mappatura delle feature per il vettore ML
+        # Le features del nostro modello Machine Learning
         self.feature_names = [
-            # Feature Raw (Bag of Words)
-            "raw_TempAlta", "raw_Ticchettio", "raw_NoFilamento",
-            # Feature Semantiche (Background Knowledge dal Reasoner)
-            "onto_AllarmeTermico", "onto_AllarmeMeccanico"
+            # 1. Feature Raw (Bag of Words)
+            "raw_TempAlta", "raw_Ticchettio", "raw_NoFilamento", 
+            "raw_PiattoFreddo", "raw_Vibrazione", "raw_Bruciato",
+            # 2. Feature Semantiche Inferite (La "Background Knowledge")
+            "onto_AllarmeTermico", "onto_AllarmeMeccanico", "onto_AllarmeElettrico"
         ]
 
     def extract_features(self, raw_symptoms_list):
-        """
-        Converte una lista di sintomi in un vettore di feature numerico.
-        Combina la presenza del sintomo grezzo con l'appartenenza alle classi
-        inferite dall'ontologia.
-        """
-        feature_vector = {name: 0 for name in self.feature_names}
+        """Converte una lista di sintomi stringa in un feature vector."""
+        vec = {name: 0 for name in self.feature_names}
         
         for symptom in raw_symptoms_list:
-            # 1. Feature Raw
-            if symptom == "TempTroppoAlta": feature_vector["raw_TempAlta"] = 1
-            if symptom == "TicchettioEstrusore": feature_vector["raw_Ticchettio"] = 1
-            if symptom == "FilamentoNonEsce": feature_vector["raw_NoFilamento"] = 1
+            # Popolamento feature RAW
+            if symptom == "TempTroppoAlta": vec["raw_TempAlta"] = 1
+            if symptom == "TicchettioEstrusore": vec["raw_Ticchettio"] = 1
+            if symptom == "FilamentoNonEsce": vec["raw_NoFilamento"] = 1
+            if symptom == "PiattoFreddo": vec["raw_PiattoFreddo"] = 1
+            if symptom == "VibrazioneAnomala": vec["raw_Vibrazione"] = 1
+            if symptom == "OdoreBruciato": vec["raw_Bruciato"] = 1
             
-            # 2. Semantic Lifting (Estrazione classi inferite dal Reasoner)
+            # Popolamento feature SEMANTICHE (Query al Reasoner)
             inferred_classes = self.reasoner.get_inferred_classes_for_symptom(symptom)
             
-            if "AllarmeTermico" in inferred_classes:
-                feature_vector["onto_AllarmeTermico"] = 1
-            if "AllarmeMeccanico" in inferred_classes:
-                feature_vector["onto_AllarmeMeccanico"] = 1
+            if "AllarmeTermico" in inferred_classes: vec["onto_AllarmeTermico"] = 1
+            if "AllarmeMeccanico" in inferred_classes: vec["onto_AllarmeMeccanico"] = 1
+            if "AllarmeElettrico" in inferred_classes: vec["onto_AllarmeElettrico"] = 1
                 
-        return [feature_vector[f] for f in self.feature_names]
+        return [vec[f] for f in self.feature_names]
 
-    def prepare_dataset(self, raw_dataset):
-        """
-        Converte un intero dataset di stringhe in matrici X (feature) e y (target) per scikit-learn.
-        """
-        print(f"[OntoBK] Arricchimento di {len(raw_dataset)} istanze con Background Knowledge...")
+    def process_dataset(self, dataframe):
+        """Processa un intero dataframe Pandas in X (features) e y (target)."""
         X = []
         y = []
-        for symptoms, target_fault in raw_dataset:
-            X.append(self.extract_features(symptoms))
-            y.append(target_fault)
+        
+        for index, row in dataframe.iterrows():
+            # I sintomi nel CSV sono separati dal punto e virgola
+            symptoms_list = row['sintomi'].split(';')
+            feature_vector = self.extract_features(symptoms_list)
+            
+            X.append(feature_vector)
+            y.append(row['guasto'])
             
         return np.array(X), np.array(y)

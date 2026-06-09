@@ -6,18 +6,18 @@ class SemanticFeatureExtractor:
         self.raw_symptoms_vocab = set()
         self.semantic_classes_vocab = set()
         
-        # 1. Analizziamo il dataset per trovare tutti i sintomi unici
+        # 1. fase di analisi del dataset per trovare tutti i sintomi unici
         for index, row in df_raw.iterrows():
             symptoms = row['sintomi'].split(';')
             for s in symptoms:
                 self.raw_symptoms_vocab.add(s)
                 
-                # 2. Interroghiamo il reasoner per trovare le superclassi
+                # 2. il reasoner viene interrogato per trovare le superclassi
                 inferred = self.reasoner.get_inferred_classes_for_symptom(s)
                 for inf_cls in inferred:
                     self.semantic_classes_vocab.add(inf_cls)
                     
-        # Fissiamo l'ordine delle feature (fondamentale per il ML)
+    
         self.raw_features = sorted(list(self.raw_symptoms_vocab))
         self.semantic_features = sorted(list(self.semantic_classes_vocab))
         self.feature_names = [f"raw_{s}" for s in self.raw_features] + [f"onto_{c}" for c in self.semantic_features]

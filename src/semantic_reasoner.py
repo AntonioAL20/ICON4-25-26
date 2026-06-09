@@ -4,7 +4,7 @@ class DiagnosticReasoner:
     def __init__(self, ontology):
         self.onto = ontology
         self.reasoner_run = False
-        self.cache_inferenze = {}  # <-- MEMORIA CACHE VELOCE
+        self.cache_inferenze = {}  # <-- MEMORIA CACHE 
 
     def run_inference(self):
         print("[Reasoner] Avvio di HermiT DL Reasoner...")
@@ -17,7 +17,7 @@ class DiagnosticReasoner:
         if not self.reasoner_run:
             raise RuntimeError("Eseguire run_inference() prima di interrogare il reasoner.")
 
-        # Se abbiamo già calcolato questo sintomo, lo peschiamo dalla cache istantaneamente!
+        # Se il sintomo è stato già calcolato, viene pescato dalla cache istantaneamente
         if symptom_name in self.cache_inferenze:
             return self.cache_inferenze[symptom_name]
 
@@ -28,6 +28,6 @@ class DiagnosticReasoner:
         inferred = [cls.name for cls in istanza_sintomo.INDIRECT_is_a 
                     if hasattr(cls, 'name') and cls.name not in ["Thing", "Sintomo", "EntitaDiagnostica"]]
         
-        # Salviamo il risultato nella cache per i prossimi cicli
+        # I risultati vengono salvati nella cache per i prossimi cicli
         self.cache_inferenze[symptom_name] = inferred
         return inferred

@@ -21,14 +21,14 @@ class SemanticFeatureExtractor:
         self.semantic_features = sorted(list(self.semantic_classes_vocab))
         self.materiali_features = sorted(list(self.materiali_vocab))
         
-        # Spazio vettoriale ulteriormente espanso per includere i nuovi sensori
+        # Spazio Vettoriale Esteso comprensivo dei sensori fisici e delle nuove astrazioni causali
         self.feature_names = (
             ["temp_estrusore", "temp_piatto", "tempo_stampa", "velocita_stampa", "umidita_ambientale", "usura_motore"] + 
             [f"mat_{m}" for m in self.materiali_features] +
             [f"raw_{s}" for s in self.raw_features] + 
             [f"onto_{c}" for c in self.semantic_features]
         )
-        print(f"[OntoBK] Spazio Vettoriale Esteso: {len(self.feature_names)} features totali")
+        print(f"[OntoBK] Spazio Vettoriale Multimodale: {len(self.feature_names)} features totali")
 
     def extract_features(self, temp_estr, temp_piatto, tempo_stampa, vel_stampa, umidita, usura, materiale, raw_symptoms_list):
         vec = {name: 0 for name in self.feature_names}
@@ -41,12 +41,12 @@ class SemanticFeatureExtractor:
         vec["umidita_ambientale"] = float(umidita)
         vec["usura_motore"] = float(usura)
         
-        # 2. Feature Categoriche Nominali (One-Hot Encoding)
+        # 2. Feature Categoriche Nominali (One-Hot Encoding del materiale)
         mat_key = f"mat_{materiale}"
         if mat_key in vec:
             vec[mat_key] = 1
             
-        # 3. NLP Grezzo e Semantic Lifting Ontologico (Logica Descrittiva)
+        # 3. NLP Grezzo e Semantic Lifting Ontologico (Sfrutta le nuove classi dedotte dal ragionamento)
         for symptom in raw_symptoms_list:
             raw_key = f"raw_{symptom}"
             if raw_key in vec:

@@ -10,7 +10,6 @@ from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import make_scorer, accuracy_score, f1_score
 
-# Import moduli locali
 from ontology_core import build_advanced_ontology
 from semantic_reasoner import DiagnosticReasoner
 from ontoBK_learning import SemanticFeatureExtractor
@@ -46,7 +45,7 @@ def evaluate_ml_model(X, y):
     }
     
     print("\n" + "="*75)
-    print(" COMPARATIVA PRESTAZIONALE MODELLI (ML + OntoBK)")
+    print(" COMPARATIVA PRESTAZIONALE MODELLI (ML + OntoBK Multidimensionale)")
     print("="*75)
     
     for name, clf in models.items():
@@ -69,11 +68,9 @@ def interactive_diagnostic_shell(model, scaler, extractor, X_dataset, y_dataset)
     
     while True:
         try:
-            # Lista materiali stampata in modo chiaro ed esplicito dentro l'input
             mat_prompt = f"\nInserisci Materiale [{', '.join(extractor.materiali_features)}]: "
             mat = input(mat_prompt).strip()
             
-            # RISOLTO IL BUG SULL'USCITA DEL PROGRAMMA
             if mat.lower() in ['esci', 'exit', 'quit', 'q']: 
                 print("Chiusura del sistema diagnostico. Arrivederci!")
                 break
@@ -89,7 +86,6 @@ def interactive_diagnostic_shell(model, scaler, extractor, X_dataset, y_dataset)
             symptoms = [s.strip() for s in sint.split(',')] if sint else []
             
             raw_features = extractor.extract_features(t_est, t_bed, ore, v_stampa, umid, usura, mat.upper(), symptoms)
-            
             scaled_features = scaler.transform([raw_features])
             
             prediction = model.predict(scaled_features)[0]

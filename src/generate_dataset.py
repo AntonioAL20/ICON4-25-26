@@ -3,11 +3,6 @@ import random
 import pandas as pd
 
 def generate_large_dataset(num_samples=1500):
-    """
-    Genera un dataset CSV sintetico ad altissima complessità.
-    Aggiunte feature ambientali, cinematiche e di usura per rendere 
-    le Reti Neurali e le SVM essenziali rispetto ai modelli lineari.
-    """
     guasti_rules = {
         "GuastoTermico": ["TempTroppoAlta", "TempInstabile", "PiattoFreddo", "VentolaRumorosa"],
         "GuastoMeccanico": ["LayerSpostati", "RumoreCinghia", "HomeFallito", "TicchettioEstrusore", "SottoEstrusione"],
@@ -15,9 +10,7 @@ def generate_large_dataset(num_samples=1500):
         "ProblemaAdesione": ["Warping", "PiattoFreddo", "FilamentoNonEsce"]
     }
     
-    # Parco materiali notevolmente espanso
     materiali = ["PLA", "ABS", "PETG", "TPU", "NYLON", "ASA", "PC"]
-    
     data = []
     
     for _ in range(num_samples):
@@ -27,41 +20,37 @@ def generate_large_dataset(num_samples=1500):
         num_sintomi = random.randint(1, min(3, len(sintomi_possibili)))
         sintomi_scelti = random.sample(sintomi_possibili, num_sintomi)
         
-        if random.random() < 0.15: # Aumentato il rumore stocastico al 15%
-            sintomo_rumore = random.choice(["VentolaRumorosa", "SchermoNero", "TicchettioEstrusore"])
-            if sintomo_rumore not in sintomi_scelti:
-                sintomi_scelti.append(sintomo_rumore)
+        # Aumentato il rumore al 25% per confondere i modelli e testare l'Ontologia
+        if random.random() < 0.25: 
+            sintomi_scelti.append(random.choice(["VentolaRumorosa", "SchermoNero", "TicchettioEstrusore", "HomeFallito"]))
                 
-        sintomi_str = ";".join(sintomi_scelti)
+        sintomi_str = ";".join(list(set(sintomi_scelti))) # Set per evitare duplicati
         materiale = random.choice(materiali)
         
-        # Generazione parametrica complessa
-        # Parametri Base
-        velocita = random.randint(40, 70)
-        umidita = random.randint(30, 50)
-        usura = random.randint(100, 1500)
+        # Generazione parametrica con MASSIMA SOVRAPPOSIZIONE (Fuzziness)
+        # I valori base ora sono normali, per costringere il ML a guardare i sintomi ontologici
+        velocita = random.randint(40, 150)
+        umidita = random.randint(30, 80)
+        usura = random.randint(100, 4000)
+        temp_estrusore = random.randint(190, 240)
+        temp_piatto = random.randint(40, 80)
         
-        if guasto_target == "GuastoTermico":
-            temp_estrusore = random.randint(240, 290) if random.random() > 0.5 else random.randint(150, 180)
-            temp_piatto = random.randint(20, 120)
-            usura = random.randint(500, 4000) # Spesso causato da termistori vecchi
-        elif guasto_target == "GuastoMeccanico":
-            velocita = random.randint(80, 180) # Alte velocità causano perdita di passi (Layer Spostati)
-            usura = random.randint(2000, 6000) # Altissima usura meccanica
-            temp_estrusore = random.randint(200, 250)
-            temp_piatto = random.randint(50, 90)
-        elif guasto_target == "ProblemaAdesione":
-            temp_piatto = random.randint(20, 50) # Piatto sempre troppo freddo
-            temp_estrusore = random.randint(190, 240)
-            velocita = random.randint(80, 120) # Primo layer stampato troppo veloce
-        else: # ProblemaElettrico
-            temp_estrusore = random.randint(200, 260)
-            temp_piatto = random.randint(60, 110)
-            umidita = random.randint(60, 90) # Alta umidità facilita i cortocircuiti
+        # Solo occasionalmente (probabilistico) il sensore fisico riflette palesemente il guasto
+        if guasto_target == "GuastoTermico" and random.random() > 0.3:
+            temp_estrusore = random.choice([random.randint(250, 290), random.randint(150, 170)])
+            usura = random.randint(1000, 5000)
             
-        # Condizioni specifiche per materiali igroscopici
-        if materiale in ["NYLON", "PETG", "TPU"] and guasto_target == "ProblemaAdesione":
-            umidita = random.randint(60, 95) # Filamento umido
+        elif guasto_target == "GuastoMeccanico" and random.random() > 0.4:
+            velocita = random.randint(100, 200)
+            usura = random.randint(3000, 7000)
+            
+        elif guasto_target == "ProblemaAdesione" and random.random() > 0.3:
+            temp_piatto = random.randint(20, 55) # Si sovrappone col range normale (40-80)
+            if materiale in ["NYLON", "PETG", "TPU"]:
+                umidita = random.randint(55, 95)
+                
+        elif guasto_target == "ProblemaElettrico" and random.random() > 0.5:
+            umidita = random.randint(60, 95)
             
         tempo_stampa_ore = round(random.uniform(0.5, 96.0), 1)
         
